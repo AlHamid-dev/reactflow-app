@@ -13,6 +13,17 @@ const initialNodes = [
     id: 'n2',
     position: { x: 100, y: 100 },
     data: { label: 'Node 2' },
+    style: {
+      width: 170,
+      height: 140,
+    },
+  },
+  {
+    id: 'n3',
+    position: { x: 100, y: 100 },
+    data: { label: 'child node 1' },
+    parentId: 'n2',
+    extent: 'parent',
   },
 ]
 
@@ -22,7 +33,6 @@ const initialEdges = [
 
 const FlowCanvas = ({ isMiniMap }) => {
   const proOptions = { hideAttribution: true };
-
   const [nodes, setNodes] = useState(initialNodes)
   const [edges, setEdges] = useState(initialEdges)
 
