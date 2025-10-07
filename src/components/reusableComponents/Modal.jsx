@@ -6,11 +6,13 @@ const Modal = ({ isOpen, name, children, closeModal }) => {
     return createPortal(
         <>
             {isOpen && <div className={classes.modalStyles}>
-                <h4>{name}</h4>
-                <div>
-                    {children}
+                <div className={classes.modalContentSytles}>
+                    <h4>{name}</h4>
+                    <div>
+                        {children}
+                    </div>
+                    <button className="mt-2" onClick={closeModal}>Close</button>
                 </div>
-                <button onClick={closeModal}>Close</button>
             </div>}
         </>,
         document.getElementById("modal-root")

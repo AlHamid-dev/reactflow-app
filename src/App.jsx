@@ -22,8 +22,8 @@ function App() {
     let children
     if (params == "Add Nodes") {
       children = <div>
-        <input type='text' />
-        <input type='number' />
+        <input className='d-block m-2' type='text' />
+        <input className='d-block m-2' type='number' />
       </div>
     }
     setModalChildren(children)
