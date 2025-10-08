@@ -1,3 +1,4 @@
+import { memo } from "react"
 
 
 const CanvasButtons = ({ toggleMiniMap,isMiniMap,openModal }) => {
@@ -11,4 +12,4 @@ const CanvasButtons = ({ toggleMiniMap,isMiniMap,openModal }) => {
         </div>
     )
 }
-export default CanvasButtons
+export default memo(CanvasButtons)
