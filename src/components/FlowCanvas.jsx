@@ -1,8 +1,10 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { ReactFlow, Background, Controls, applyEdgeChanges, applyNodeChanges, addEdge, MiniMap } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import ResizableNode from './ResizableNode';
 import ResizableGroup from './ResizableGroup';
+import DownloadButton from './DownloadFlow';
+import Modal from './reusableComponents/Modal';
 
 // const initialNodes = [
 //   {
@@ -35,18 +37,38 @@ import ResizableGroup from './ResizableGroup';
 
 const initialNodes = []
 const initialEdges = []
+const connectionLineStyle = { stroke: '#ffff' }
+const snapGrid = [25, 25]
+const proOptions = { hideAttribution: true }
+const defaultEdgeOptions = {
+  animated: false,
+  type: 'smoothstep',
+};
+
+const defaultViewport = { x: 0, y: 0, zoom: 1.5 };
 
 const FlowCanvas = ({ nodeData, isMiniMap }) => {
-  const proOptions = { hideAttribution: true };
   const [nodes, setNodes] = useState(initialNodes)
   const [edges, setEdges] = useState(initialEdges)
 
+  //child modal
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalName, setModalName] = useState("")
+  const [modalChildren, setModalChildren] = useState()
+  const [nodeName, setNodeName] = useState("")
+  const nodeNameRef = useRef("")
+
   useEffect(() => {
-    console.log("nodeData",nodeData)
+    console.log("nodeData", nodeData)
     if (undefined !== nodeData) {
       setNodes((prev) => prev.concat(nodeData))
     }
   }, [nodeData])
+
+  //   useEffect(() => {
+  //   console.log("nodes", nodes)
+    
+  // }, [nodes])
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
@@ -66,24 +88,64 @@ const FlowCanvas = ({ nodeData, isMiniMap }) => {
 
   const memoizedNodeTypes = (() => ({
     resizable: ResizableNode,
-    resizableGroup: (props) => (<ResizableGroup {...props} />)
+    resizableGroup: (props) => (<ResizableGroup {...props} addChild={handleChildModal} />)
   }), [])
+
+  const nodeTypes = {
+    ResizableNode,
+    // resizableGroup: (props) => (<ResizableGroup {...props} addChild={handleChildModal} />),
+    ResizableGroup
+  }
+console.log("nodeTypes",nodeTypes)
+
+  useEffect(() => {
+    if (isModalOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isModalOpen]);
+
+  const handleChildModal = useCallback((id, data) => {
+    setNodeName("")
+    setModalName("Add Child Node")
+    setIsModalOpen(prev => !prev)
+    children = <div>
+      <input ref={inputRef} className='d-block m-2' type='text' onChange={(e) => {
+        setNodeName(e.target.value)
+        nodeNameRef.current = e.target.value
+      }}
+        onKeyDown={(e) => { if (e.key == "Enter") { createNode() } }} />
+      <button className='btn btn-primary' onClick={createNode}>Create Node</button>
+    </div>
+    setModalChildren(children)
+  }, [])
 
   return (
     <div style={{ height: "100%" }}>
+      <Modal name={modalName} isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} >
+        {modalChildren}
+      </Modal>
       <ReactFlow
-        nodeTypes={memoizedNodeTypes}
+        // nodeTypes={memoizedNodeTypes}
+        nodeTypes={nodeTypes}
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         proOptions={proOptions}
+        connectionLineStyle={connectionLineStyle}
+        connectionLineType="smoothstep"
+        snapToGrid={true}
+        snapGrid={snapGrid}
+        defaultViewport={defaultViewport}
+        defaultEdgeOptions={defaultEdgeOptions}
+        className="download-image"
         fitView
       >
         {isMiniMap && <MiniMap zoomable pannable />}
         <Background />
         <Controls />
+        <DownloadButton />
       </ReactFlow>
     </div>
   )

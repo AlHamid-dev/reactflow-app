@@ -15,31 +15,80 @@ function App() {
 
   const toggleMiniMap = useCallback(() => {
     setIsMiniMap(prev => !prev)
-
   }, [])
 
   useEffect(() => {
     console.log("nodeName", nodeName)
   }, [nodeName])
 
-  function generateUniqueID(){
+  function generateUniqueID() {
     let id = Math.floor(1000 + Math.random() * 9000)
     return id.toString()
   }
 
-  const createNode = () => {
+  const createNode = (param, id) => {
+    console.log("param", param, "id", id)
     console.log("nodeNameRef", nodeNameRef)
     if (nodeNameRef.current == "") {
       alert("Enter Node name")
       return
     }
-    let nodeObj = {
-      id: `node_${generateUniqueID()}`,
-      type: "resizableGroup", data: { label: nodeNameRef.current }, position: { x: 0, y: 0 },
-      style: { width: 170, height: 140, background: "transparent", border: "1px solid black", borderRadius: 15, fontSize: 12 }
+    let nodeObj
+    if (param == "parent") {
+      nodeObj = {
+        id: `node_${generateUniqueID()}`,
+        type: "ResizableGroup",
+        data: {
+          label: nodeNameRef.current, customProp: "Hello",
+          addChild: (id, data, param) => {
+            console.log("addChild", id, data, param)
+            openChildModal(id, data)
+          }
+        },
+        position: { x: 0, y: 0 },
+        style: { width: 170, height: 140, background: "white", border: "1px solid black", borderRadius: 15, fontSize: 12 }
+      }
+
+    }
+    else if (param == "child") {
+      nodeObj = {
+        id: `node_${generateUniqueID()}`,
+        type: "ResizableNode",
+        data: {
+          label: nodeNameRef.current,
+        },
+        parentId: id,
+        extent: "parent",
+        position: { x: 10, y: 30 },
+        style: { width: 80, background: "white", border: "1px solid black", borderRadius: 10, fontSize: 10 }
+      }
     }
     setNodeData(nodeObj)
     setIsModalOpen(false)
+  }
+
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (isModalOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isModalOpen]);
+
+  const openChildModal = (id) => {
+    setNodeName("")
+    setModalName("Add Child Node")
+    setIsModalOpen(prev => !prev)
+    let children
+    children = <div>
+      <input ref={inputRef} className='d-block m-2' type='text' onChange={(e) => {
+        setNodeName(e.target.value)
+        nodeNameRef.current = e.target.value
+      }}
+        onKeyDown={(e) => { if (e.key == "Enter") { createNode("child", id) } }} />
+      <button className='btn btn-primary' onClick={() => createNode("child", id)}>Create Child Node</button>
+    </div>
+    setModalChildren(children)
   }
 
   const toggleModal = useCallback((params) => {
@@ -47,18 +96,28 @@ function App() {
     setModalName(params)
     setIsModalOpen(prev => !prev)
     let children
-    if (params == "Add Nodes") {
+    if (params == "Add Node") {
       children = <div>
-        <input className='d-block m-2' type='text' onChange={(e) => {
+        <input ref={inputRef} className='d-block m-2' type='text' onChange={(e) => {
           setNodeName(e.target.value)
           nodeNameRef.current = e.target.value
-        }} />
-        <button onClick={createNode}>Create Node</button>
-        {/* <input className='d-block m-2' type='text' onChange={} /> */}
+        }}
+          onKeyDown={(e) => { if (e.key == "Enter") { createNode("parent") } }} />
+        
+        <button className='btn btn-primary' onClick={() => createNode("parent")}>Create Node</button>
+      </div>
+    }
+    else if (params == "Update Node") {
+      children = <div>
+        <input ref={inputRef} className='d-block m-2' type='text' onChange={(e) => {
+          setNodeName(e.target.value)
+          nodeNameRef.current = e.target.value
+        }}
+          onKeyDown={(e) => { if (e.key == "Enter") { createNode("parent") } }} />
+        <button className='btn btn-primary' onClick={() => createNode("parent")}>Update Node</button>
       </div>
     }
     setModalChildren(children)
-
   }, [])
 
   return (

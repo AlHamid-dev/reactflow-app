@@ -11,7 +11,7 @@ const Modal = ({ isOpen, name, children, closeModal }) => {
                     <div>
                         {children}
                     </div>
-                    <button className="mt-2" onClick={closeModal}>Close</button>
+                    <button className="btn btn-danger mt-2" onClick={closeModal}>Close</button>
                 </div>
             </div>}
         </>,
