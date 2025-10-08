@@ -1,0 +1,32 @@
+name: React CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout repo code
+      - uses: actions/checkout@v4
+
+      # Setup Node.js environment
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # Install dependencies (uses package-lock.json or yarn.lock)
+      - name: Install dependencies
+        run: npm ci
+
+      # Run tests (optional — you can remove if unused)
+      - name: Run tests
+        run: npm test -- --watchAll=false
+
+      # Build the React app
+      - name: Build app
+        run: npm run build
